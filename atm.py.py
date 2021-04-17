@@ -1,13 +1,15 @@
-#register
-#login to the atm
-#atmoperations
+"""
+A mock up ATM project that allows a user to
+perform some operations in the atm
+"""
+
 from datetime import datetime
 import random
 
 #create a database for existing users 
-database = {1234567890: ["Tundun", "Ubay", "ubay@gmail.com", "ubay20"],
-            2987453090: ["Seyi", "Xyluz", "seyi@gmail.com", "seyi20"],
-            2345127890: ["Mike", "Lore", "mike@gmail.com", "mike20"]
+database = {1234567890: ["Tundun", "Ubay", "ubay@gmail.com", "ubay20", 100],
+            2987453090: ["Seyi", "Xyluz", "seyi@gmail.com", "seyi20", 300],
+            2345127890: ["Mike", "Lore", "mike@gmail.com", "mike20", 400]
             }
 
 #Initializes the app
@@ -30,15 +32,14 @@ def init():
         init()
 
 #Generate account number 
-#   
+ 
 def generateAccountNumber():
     return random.randrange(1111111111, 9999999999)
 
-def passwordCreate():
-    passw = input("Create a password \n")
-    if len(passw) > 10 :
-        print("Your password is longer than 10 digits ")
-        passwordCreate()
+def get_current_balance():
+    for accountNumber, userDetails in database.items():
+        return userDetails[4]
+
 
 #The register function
 
@@ -48,11 +49,11 @@ def register():
     firstName = input("Enter your firstname \n")
     lastName = input("Enter your lastname \n")
     email = input("Enter your email \n")
-    password = passwordCreate()
+    password = input("Create a password for yourself \n")
 
     accountNumber = generateAccountNumber()
 
-    database[accountNumber] = [firstName, lastName, email, password]
+    database[accountNumber] = [firstName, lastName, email, password, 0]
     print("Your account has been successfully created")
     print("============================")
     print("This is your account number: %d " %accountNumber)
@@ -70,45 +71,70 @@ def login():
     print("************Login************* ")
     accountNumberFromUser = int(input("Enter your account number \n"))
     passwordFromUser = input("Enter your password \n")
-
-    for accountNumber, userDetails in database.items():
-        if accountNumber == accountNumberFromUser:
-            if userDetails[3] == passwordFromUser:
-                atmOperations(userDetails)
-        else:
-            print("Invalid account or password")
-            login()
-    atmOperations(userDetails)
+    accountNumbers = list(database.keys())
+    userDetails = list(database.values())
+    passwords = [i[3] for i in userDetails]
+    if accountNumberFromUser in accountNumbers:
+        if passwordFromUser in passwords:
+            atmOperations()
+    else:
+        print("Invalid account or password")
+        login()
+    
+    atmOperations()
 
 #The atm-operations function
 
-def atmOperations(user):
-    print("You have successfully logged in")
-    print("Welcome %s %s " % ( user[0], user[1] ) )
+def atmOperations():
+    print("You have successfully logged in Dear customer")
     print('These are the available options')
     print('1. Withdrawal')
     print('2. Cash deposit')
     print('3. Complaint')
+    print('4. Logout')
+    print('5. Exit')
     selectedOption = int(input('Please select an option \n'))
+    
     if selectedOption == 1:
-        print('You selected', selectedOption)
-        print('How much will you like to withdraw?')
-        cash = int(input('Enter amount\n'))
-        print('Take your cash')
-        print("Thanks for banking with us")
+        Withdrawal()
     elif selectedOption == 2:
-        print('You selected', selectedOption)
-        print('How much would you like to deposit?')
-        amount = float(input('Enter amount\n'))
-        print('Your current balance is', amount)
-        print("Thanks for banking with us")
+        cashDeposit()
     elif selectedOption == 3:
-        print('You selected', selectedOption)
-        print('What issue will you like to report')
-        complaint = input('Enter your complaint\n')
-        print('Thank you for contacting us')
+        complaint()
+    elif selectedOption == 4:
+        login()
+    elif selectedOption == 5:
+        exit()
     else:
         print('Invalid option selected, please try again')
-        atmOperations(userDetails)
+        atmOperations()
 
+#The withdrawal function that allows the user to withdraw
+
+def Withdrawal():
+    print("You have selected option 1")
+    amount_to_withdraw = int(input("Enter amount you want to withdraw \n"))
+    current_balance = get_current_balance()
+    if current_balance > amount_to_withdraw:
+        new_balance = current_balance - amount_to_withdraw
+        print("Take your cash")
+        print("New balance: ", new_balance) 
+    else:
+        print("You have insufficient balance")
+        init()
+
+#The deposit function that allows the user to deposit funds
+def cashDeposit():
+    current_balance = get_current_balance()
+    amount_to_deposit = int(input("Enter amount to deposit "))
+    new_balance = current_balance + amount_to_deposit
+    print("Money recieved")
+    print("Your new balance is:", new_balance)
+    init()
+
+#The complaint function that allows the user to make complaints
+def complaint():
+    complain = input("Enter your complain\n")
+    print("Your complain is duly noted")
+    init()
 init()
